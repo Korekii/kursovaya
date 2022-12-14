@@ -1,10 +1,13 @@
 package com.example.kurs.controllers;
 
-import com.example.kurs.models.Classes;
-import com.example.kurs.repo.ClassesRepository;
+import com.example.kurs.models.Students;
+import com.example.kurs.repo.StudentsRepository;
+import com.example.kurs.models.StudyGroups;
+import com.example.kurs.repo.StudyGroupsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,106 +19,154 @@ import java.util.Optional;
 
 @Controller
 public class SiteController {
-
     @Autowired
-    private ClassesRepository classesRepository;
+    private StudentsRepository studentsRepository;
+    @Autowired
+    private StudyGroupsRepository studyGroupsRepository;
 
-    @GetMapping("/studentList")//отображение страницы со студентами
-    public String baseStudent(org.springframework.ui.Model model) {
-        model.addAttribute("title", "Список студентов");
-        Iterable<Classes> classes = classesRepository.findAll();
-        model.addAttribute("nameSt", classes);
-        return "studentList";
+    @GetMapping("/students")
+    public String students(Model model) {
+        Iterable<Students> students = studentsRepository.findAll();
+        model.addAttribute("students", students);
+        return "students";
     }
 
-    @GetMapping("/groupList")//отображение страницы с группами
-    public String baseGroup(org.springframework.ui.Model model) {
-        model.addAttribute("title", "Список групп");
-        Iterable<Classes> classes = classesRepository.findAll();
-        model.addAttribute("groupSt", classes);
-        return "groupList";
+    @GetMapping("/students/add")
+    public String studentsAdd(Model model) {
+        return "students-add";
     }
 
-    @PostMapping("/studentList")//добавление нового студента
-    public String studentAdd(@RequestParam String nameSt, @RequestParam String groupSt, org.springframework.ui.Model model) {
-        Classes newStudent = new Classes(nameSt, groupSt);
-        classesRepository.save(newStudent);
-        return "redirect:/studentList";
-    }
-
-    @PostMapping("/groupList")//добавление новой группы
-    public String groupAdd(@RequestParam String groupSt, org.springframework.ui.Model model) {
-        Classes newGroup = new Classes(groupSt);
-        classesRepository.save(newGroup);
-        return "redirect:/groupList";
-    }
-
-    @GetMapping("/groupList/{id}")//расширенный список группы
-    public String detailedList(@PathVariable(value = "id")long id, org.springframework.ui.Model model) {
-        if (!classesRepository.existsById(id)){
-            return "redirect:/groupList";
+    @PostMapping("/students/add")
+    public String studentsPostAdd(@RequestParam String name,
+                                  @RequestParam String group,
+                                  Model model) {
+        Students students = new Students(name);
+        if(studyGroupsRepository.findByName(group).isPresent()){
+            StudyGroups studyGroups = (StudyGroups) studyGroupsRepository.findByName(group).get();
+            students.setGroup(studyGroups);
+            studentsRepository.save(students);
         }
-        Optional<Classes> thisGroup = classesRepository.findById(id);
-        ArrayList<Classes> res = new ArrayList<>();
-        thisGroup.ifPresent(res::add);
-        model.addAttribute("groupSt", res);
-        return "groupDetailed";
-    }
-
-    @GetMapping("/groupList/{id}/edit")//изменение группы
-    public String groupEdit(@PathVariable(value = "id")long id, org.springframework.ui.Model model) {
-        if (!classesRepository.existsById(id)){
-            return "redirect:/groupList";
+        else{
+            StudyGroups studyGroups = new StudyGroups(group);
+            studyGroupsRepository.save(studyGroups);
+            students.setGroup(studyGroups);
+            studentsRepository.save(students);
         }
-        Optional<Classes> thisGroup = classesRepository.findById(id);
-        ArrayList<Classes> res = new ArrayList<>();
-        thisGroup.ifPresent(res::add);
-        model.addAttribute("groupSt", res);
-        return "editGroup";
+        studentsRepository.save(students);
+        return "redirect:/students";
     }
 
-    @PostMapping("/groupList/{id}/edit")//обновление данных
-    public String groupUpdate(@PathVariable(value = "id")long id, @RequestParam String groupSt, org.springframework.ui.Model model) {
-        Classes changeGroup = classesRepository.findById(id).orElseThrow();
-        changeGroup.setGroupName(groupSt);
-        classesRepository.save(changeGroup);
-        return "redirect:/groupList";
-    }
-
-    @PostMapping("/groupList/{id}/remove")//удаление группы
-    public String groupDelete(@PathVariable(value = "id") long id, org.springframework.ui.Model model) {
-        Classes deleteGroup = classesRepository.findById(id).orElseThrow();
-        classesRepository.delete(deleteGroup);
-        return "redirect:/groupList";
-    }
-
-    @GetMapping("/studentList/{id}/edit")//изменение данных студента
-    public String studentEdit(@PathVariable(value = "id") long id, org.springframework.ui.Model model) {
-        if (!classesRepository.existsById(id)){
-            return "redirect:/studentList";
+    @GetMapping("/students/{id}")
+    public String studentsDetails(@PathVariable(value = "id") long id,
+                                  Model model) {
+        if (!studentsRepository.existsById(id)) {
+            return "redirect:/students";
         }
-        Optional<Classes> thisStudent = classesRepository.findById(id);
-        ArrayList<Classes> res = new ArrayList<>();
-        thisStudent.ifPresent(res::add);
-        model.addAttribute("nameSt", res);
-        return "editStudent";
+        Optional<Students> students = studentsRepository.findById(id);
+        ArrayList<Students> res = new ArrayList<>();
+        students.ifPresent(res::add);
+        model.addAttribute("students", res);
+        return "students-details";
     }
 
-    @PostMapping("/studentList/{id}/edit")//обновление данных
-    public String studentUpdate(@PathVariable(value = "id")long id, @RequestParam String nameSt, @RequestParam String groupSt, org.springframework.ui.Model model) {
-        Classes changeStudent = classesRepository.findById(id).orElseThrow();
-        changeStudent.setStudentName(nameSt);
-        changeStudent.setGroupName(groupSt);
-        classesRepository.save(changeStudent);
-        return "redirect:/studentList";
+    @GetMapping("/students/{id}/edit")
+    public String studentsEdit(@PathVariable(value = "id") long id,
+                               Model model) {
+        if (!studentsRepository.existsById(id)) {
+            return "redirect:/students";
+        }
+        Optional<Students> students = studentsRepository.findById(id);
+        ArrayList<Students> res = new ArrayList<>();
+        students.ifPresent(res::add);
+        model.addAttribute("students", res);
+        return "students-edit";
     }
 
-    @PostMapping("/studentList/{id}/remove")//удаление данных студента
-    public String studentDelete(@PathVariable(value = "id") long id, org.springframework.ui.Model model) {
-        Classes deleteStudent = classesRepository.findById(id).orElseThrow();
-        classesRepository.delete(deleteStudent);
-        return "redirect:/studentList";
+    @PostMapping("/students/{id}/edit")
+    public String studentsPostUpdate(@PathVariable(value = "id") long id,
+                                     @RequestParam String name,
+                                     @RequestParam String group,
+                                     Model model) {
+        Students students = studentsRepository.findById(id).orElseThrow();
+
+        if(studyGroupsRepository.findByName(group).isPresent()){
+            StudyGroups studyGroups = (StudyGroups) studyGroupsRepository.findByName(group).get();
+            students.setName(name);
+            students.setGroup(studyGroups);
+            studentsRepository.save(students);
+        } else {
+            StudyGroups studyGroups = new StudyGroups(group);
+            studyGroupsRepository.save(studyGroups);
+            students.setName(name);
+            students.setGroup(studyGroups);
+            studentsRepository.save(students);
+        }
+        return "redirect:/students";
     }
 
+    @PostMapping("/students/{id}/remove")
+    public String studentsPostDelete(@PathVariable(value = "id") long id,
+                                     Model model) {
+        Students students = studentsRepository.findById(id).orElseThrow();
+        studentsRepository.delete(students);
+        return "redirect:/students";
+    }
 
+    @GetMapping("/groups")
+    public String groups(Model model) {
+        Iterable <StudyGroups> studyGroups = studyGroupsRepository.findAll();
+        model.addAttribute("studyGroups", studyGroups);
+        return "groups";
+    }
+
+    @GetMapping("/groups/add")
+    public String groupsAdd(Model model) {
+        return "groups-add";
+    }
+
+    @PostMapping("/groups/add")
+    public String groupsPostAdd(@RequestParam String name,
+                                Model model) {
+        if(studyGroupsRepository.findByName(name).isPresent()){
+            return "redirect:/groups";
+        }
+        StudyGroups studyGroups = new StudyGroups(name);
+        studyGroupsRepository.save(studyGroups);
+        return "redirect:/groups";
+    }
+
+    @GetMapping("/groups/{id}")
+    public String groupsEdit(@PathVariable(value = "id") long id,
+                                Model model) {
+        if (!studyGroupsRepository.existsById(id)) {
+            return "redirect:/groups";
+        }
+        Optional<StudyGroups> studyGroups = studyGroupsRepository.findById(id);
+        ArrayList<StudyGroups> res = new ArrayList<>();
+        studyGroups.ifPresent(res::add);
+        model.addAttribute("studyGroups", res);
+        return "groups-details";
+    }
+    @GetMapping("/groups/{id}/edit")
+    public String groupsDetails(@PathVariable(value = "id") long id,
+                                Model model) {
+        if (!studyGroupsRepository.existsById(id)) {
+            return "redirect:/groups";
+        }
+        Optional<StudyGroups> studyGroups = studyGroupsRepository.findById(id);
+        ArrayList<StudyGroups> res = new ArrayList<>();
+        studyGroups.ifPresent(res::add);
+        model.addAttribute("studyGroups", res);
+        return "groups-edit";
+    }
+
+    @PostMapping("/groups/{id}/edit")
+    public String groupsPostUpdate(@PathVariable(value = "id") long id,
+                                   @RequestParam String name,
+                                   Model model) {
+        StudyGroups studyGroups = studyGroupsRepository.findById(id).orElseThrow();
+        studyGroups.setName(name);
+        studyGroupsRepository.save(studyGroups);
+        return "redirect:/groups";
+    }
 }
