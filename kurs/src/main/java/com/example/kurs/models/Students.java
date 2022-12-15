@@ -8,16 +8,21 @@ public class Students {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(name = "name",nullable = false)
     private String name;
-
-
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "group_id",referencedColumnName = "id",nullable = false)
     private StudyGroups group;
-
+    private String group_name;
     public Students() {
+    }
+
+    public String getGroup_name() {
+        return group_name;
+    }
+
+    public void setGroup_name(String group_name) {
+        this.group_name = getGroup().getName();
     }
 
     public Students(String name) {

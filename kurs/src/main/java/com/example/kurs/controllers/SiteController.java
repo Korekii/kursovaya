@@ -26,9 +26,26 @@ public class SiteController {
 
     @GetMapping("/students")
     public String students(Model model) {
+        model.addAttribute("title","Список студентов");
         Iterable<Students> students = studentsRepository.findAll();
         model.addAttribute("students", students);
         return "students";
+    }
+
+    @GetMapping("/students/{id}")
+    public String studentsDetails(@PathVariable(value = "id") long id,
+                                  Model model) {
+        if (!studentsRepository.existsById(id)) {
+            return "redirect:/students";
+        }
+        Optional<Students> students = studentsRepository.findById(id);
+        System.out.println(students.get().getGroup());
+        System.out.println(students.get().getId());
+        System.out.println(students.get().getName());
+        model.addAttribute("name", students.get().getName());
+        model.addAttribute("id", students.get().getId());
+        model.addAttribute("group", students.get().getGroup_name());
+        return "students-details";
     }
 
     @GetMapping("/students/add")
@@ -56,18 +73,7 @@ public class SiteController {
         return "redirect:/students";
     }
 
-    @GetMapping("/students/{id}")
-    public String studentsDetails(@PathVariable(value = "id") long id,
-                                  Model model) {
-        if (!studentsRepository.existsById(id)) {
-            return "redirect:/students";
-        }
-        Optional<Students> students = studentsRepository.findById(id);
-        ArrayList<Students> res = new ArrayList<>();
-        students.ifPresent(res::add);
-        model.addAttribute("students", res);
-        return "students-details";
-    }
+
 
     @GetMapping("/students/{id}/edit")
     public String studentsEdit(@PathVariable(value = "id") long id,
