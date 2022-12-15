@@ -8,14 +8,13 @@
 <body>
 <div th:insert="~{Blocks/header :: header}"></div>
 
-<div>
-    <h3 th:text="${name}"></h3>
-    <h3 th:value="${id}"></h3>
-    <h5 th:text="${group_name}"></h5>
-    <a th:href="'/students/' + 'edit/'+ ${id} " class="btn btn-warning">Изменить</a>
-
+<div th:each="number : ${studyGroups}" class="alert alert-info mt-2">
+  <h3 th:text="${number.name}"/>
+  <a th:href="'/groups/' + ${number.id} " class="btn btn-warning">Подробнее</a>
+  <form th:action="'/groups/' + 'remove/' +${number.id}" method="post"><br>
+    <button class="btn btn-warning" type="submit">Удалить</button>
+  </form>
 </div>
-
-</body>
 <footer th:insert="~{Blocks/footer :: footer}"></footer>
+</body>
 </html>

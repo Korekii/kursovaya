@@ -10,7 +10,7 @@ public class Students {
     private Long id;
     @Column(name = "name",nullable = false)
     private String name;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id",referencedColumnName = "id",nullable = false)
     private StudyGroups group;
     private String group_name;
@@ -21,7 +21,7 @@ public class Students {
         return group_name;
     }
 
-    public void setGroup_name(String group_name) {
+    public void setGroup_name() {
         this.group_name = getGroup().getName();
     }
 
