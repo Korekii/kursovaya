@@ -9,9 +9,9 @@
 <div th:insert="~{Blocks/header :: header}"></div>
 
 <div>
-    <h3 th:text="${name}"></h3>
-    <h3 th:value="${id}"></h3>
-    <h5 th:text="${group_name}"></h5>
+    <h3 th:text="${name}"></h3><br>
+    <h3 th:value="${id}"></h3><br>
+    <h5 th:text="${group_name}"></h5><br>
     <a th:href="'/students/' + 'edit/'+ ${id} " class="btn btn-warning">Изменить</a>
 
 </div>

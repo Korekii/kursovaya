@@ -7,5 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 public interface StudentsRepository extends CrudRepository<Students, Long> {
     Iterable<Students> findByGroup(Long group_id);
 
+    Iterable<Students> findByName(String name);
+
+
 }
 

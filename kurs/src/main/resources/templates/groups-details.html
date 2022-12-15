@@ -8,6 +8,7 @@
 <body>
 <div th:insert="~{Blocks/header :: header}"></div>
 
+
 <div>
     <h3 th:text="${name}"></h3>
     <h3 th:value="${id}"></h3>
@@ -17,17 +18,17 @@
             <thead>
             <tr>
                 <th scope="col">ФИО</th>
-                <th scope="col">ID</th>
+                <th scope="col">Действия</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="student : ${students}">
                 <td th:text="${student.getName()}"></td>
-                <td th:text="${student.getId()}"></td>
                 <td>
                     <a th:href="@{/students/edit/{id}(id=${student.getId()})}" class="btn btn-control">Редактировать</a>
-                    <a th:href="@{/students/remove/{id}(id=${student.getId()})}" class="btn btn-danger">Удалить</a>
-                </td>
+                    <form th:action="'/students/remove/' + ${student.getId()}" method="post"><br>
+                        <button class="btn btn-warning" type="submit">Удалить</button>
+                    </form>
             </tr>
             </tbody>
         </table>

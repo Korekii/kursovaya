@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -28,6 +30,28 @@ public class StudentController {
         Iterable<Students> students = studentsRepository.findAll();
         model.addAttribute("students", students);
         return "students";
+    }
+    @GetMapping("/students/namesearch")
+    public String studentQuery(String name,
+                               Model model) {
+        Iterable<Students> students = studentsRepository.findByName(name);
+        model.addAttribute("students", students);
+        return "studentsQueried";
+    }
+    @Transactional
+    @GetMapping("/students/groupsearch")
+    public String studentQueryGroup(String name,
+                               Model model) {
+        Iterable<Students> students = studentsRepository.findAll();
+        List<Students> res = new ArrayList<>();
+        for (Students student : students) {
+            System.out.println(student.getGroup().getName());
+            if (student.getGroup().getName().equals(name)) {
+                res.add(student);
+            }
+        }
+        model.addAttribute("students", res);
+        return "studentsQueried";
     }
     @Transactional
     @GetMapping("/students/{id}")
